@@ -24,3 +24,7 @@
 
 # code coverage
 **/tarpaulin-report.*
+
+# Local
+./Cargo.toml
+./Cargo.lock
