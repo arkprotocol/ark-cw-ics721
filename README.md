@@ -1,57 +1,62 @@
-# ICS721
+This is an implementation of the [ICS 721
+specification](https://github.com/cosmos/ibc/tree/master/spec/app/ics-721-nft-transfer)
+written in CosmWasm.
 
-This is an _IBC Enabled_ contract that allows sending NFTs from one CosmWasm chain over the ICS721 (draft) standard to another CosmWasm chain.
+**This code has not yet been audited. Please, do not use it for
+anything mission critical.**
 
-It can be extended to also send NFTs from a CosmWasm chain to the native NFT module on a Cosmos SDK chain that doesn't have CosmWasm support.
+This is an extended implementation of [ICS
+721](https://github.com/cosmos/ibc/tree/master/spec/app/ics-721-nft-transfer)
+to make ICS 721 NFTs
+[cw721](https://github.com/CosmWasm/cw-nfts/tree/main/packages/cw721)
+compatible. This means that any dapp that interacts with cw721 NFTs
+can also interact with NFTs from other blockchains when this
+implementation of ICS 721 is on the receiving side of the transfer.
 
-## Workflow
+Three contracts orchestrate this:
 
-Similar to cw20-ics20, the contract starts with minimal state, just the default timeout for all the packets it sends.
+1. `cw-ics721-bridge` implements the "NFT transfer bridge" and "NFT
+   asset tracking module" parts of the ICS 721 spec.
+2. `ics-escrow` escrows NFTs while are away on foreign chains.
 
-An external party has to make one or more channels using this contract as one endpoint.
+## Sending NFTs
 
-You can send any SG721 token to this contract via the [receiver pattern](https://github.com/CosmWasm/cw-nfts/blob/main/packages/cw721/src/receiver.rs).
+To send a NFT from one chain to another over IBC:
 
-## Messages
+1. The bridge contract receives the NFT via cw721's `Send` method.
+2. The bridge contract deserializes the `msg` field on `Send` into an
+   `IbcAwayMsg` which specifies the channel the NFT ought to be sent
+   away on as well as the receiver on the receiving chain.
+3. The sent cw721 is locked in the escrow contract for the sending
+   channel.
+4. A message is sent to the bridge contract on the other side of the
+   connection which causes it to mint an equivalent NFT on the
+   receiving chain.
+5. Upon receiving confirmation (ACK) from the receiving chain that the
+   transfer has completed, burns the NFTs if they are returning to
+   their original chain. For example for the path `A -> B -> A`, the
+   NFTs minted on transfer from `A -> B` are burned on transfer from
+   `B -> A`.
 
-This contract only accepts a `Sg721ReceiveMsg` from a sg721 contract.
+## Receiving NFTs
 
-```rust
-pub struct Sg721ReceiveMsg {
-    pub sender: String,
-    pub token_id: String,
-    pub msg: Binary,
-}
-```
+Upon receiving the message sent in (4) above, the bridge contract
+checks if the NFT it is receiving had previously been sent from it to
+the other chain. If it has been, the contract:
 
-The data inside the message must be JSON-serialized.
+1. Updates the classID field on the NFT in accordance with the
+   [specification](https://github.com/cosmos/ibc/tree/main/spec/app/ics-721-nft-transfer#data-structures).
+2. Unescrows the NFTs that are returning and sends them to the
+   receivers specified in the
+   [`NonFungibleTokenPacketData`](https://github.com/cosmos/ibc/tree/main/spec/app/ics-721-nft-transfer#data-structures)
+   message.
 
-```rust
-pub struct TransferMsg {
-    /// The local channel to send the packets on
-    pub channel: String,
-    /// The remote address to send to
-    /// Don't use HumanAddress as this will likely have a different Bech32 prefix than we use
-    /// and cannot be validated locally
-    pub remote_address: String,
-    /// How long the packet lives in seconds. If not specified, use default_timeout
-    pub timeout: Option<u64>,
-}
-```
+If the bridge contract determines that the NFTs being transfered have
+not previously been sent from the chain it:
 
-## Queries
-
-Queries only make sense relative to the established channels of this contract.
-
-- `Port{}` - returns the port ID this contract has bound, so you can create channels. This info can be queried
-  via wasmd contract info query, but we expose another query here for convenience.
-- `ListChannels{}` - returns a (currently unpaginated) list of all channels that have been created on this contract.
-  Returns their local channelId along with some basic metadata, like the remote port/channel and the connection they
-  run on top of.
-- `Channel{id}` - returns more detailed information on one specific channel. In addition to the information available
-  in the list view, it returns the list of class_ids (which include the contract address).
-- `Tokens{channel_id, class_id}` - returns all the tokens that have been sent through the channel for a specific class-id.
-
-## Credits
-
-This README was adapted from the cw20-ics20 [README](https://github.com/CosmWasm/cw-plus/tree/main/contracts/cw20-ics20).
+1. Updates the classID field to add its path information.
+2. If it has never seen a NFT that is part of the collection being
+   sent over, instantiates a new cw721 contract to represent that
+   collection.
+3. Mints new cw721 NFTs using the instantiated cw721 for the
+   collection being sent over for the receivers.
