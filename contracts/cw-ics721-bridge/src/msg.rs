@@ -2,8 +2,7 @@ use cosmwasm_std::{to_binary, Addr, Env, IbcTimeout, StdResult, WasmMsg};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, JsonSchema)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
 pub struct InstantiateMsg {
     /// Code ID of cw721-ics contract. A new cw721-ics will be
     /// instantiated for each new IBCd NFT classID.
@@ -15,8 +14,7 @@ pub struct InstantiateMsg {
     pub cw721_base_code_id: u64,
 }
 
-#[derive(Serialize, Deserialize, JsonSchema)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     /// Receives a NFT to be IBC transfered away. The `msg` field must
@@ -27,8 +25,7 @@ pub enum ExecuteMsg {
     Callback(CallbackMsg),
 }
 
-#[derive(Serialize, Deserialize, JsonSchema)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum CallbackMsg {
     /// Mints a NFT of collection class_id for receiver with the
@@ -88,15 +85,13 @@ pub enum CallbackMsg {
     },
 }
 
-#[derive(Serialize, Deserialize, JsonSchema)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
 pub struct TransferInfo {
     pub class_id: String,
     pub token_ids: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, JsonSchema)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
 pub struct NewTokenInfo {
     pub class_id: String,
     pub token_ids: Vec<String>,
@@ -117,8 +112,7 @@ pub struct IbcAwayMsg {
 }
 
 // TODO(ekez): add queries for pagination of contract state.
-#[derive(Serialize, Deserialize, JsonSchema)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
     /// Gets the classID this contract has stored for a given NFT
