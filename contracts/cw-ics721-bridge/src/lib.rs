@@ -12,3 +12,4 @@ mod ibc_tests;
 mod integration_tests;
 
 pub use crate::error::ContractError;
+pub use crate::error::Never;
