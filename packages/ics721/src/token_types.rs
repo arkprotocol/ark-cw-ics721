@@ -4,7 +4,7 @@ use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{to_binary, Addr, Binary, StdResult, WasmMsg};
 use cw_storage_plus::{Bound, Bounder, Key, KeyDeserialize, Prefixer, PrimaryKey};
 
-use crate::msg::{CallbackMsg, ExecuteMsg};
+use crate::msg::{CallbackMsg, Ics721InnerCallback};
 
 /// A token ID according to the ICS-721 spec. The newtype pattern is
 /// used here to provide some distinction between token and class IDs
@@ -97,10 +97,12 @@ impl VoucherRedemption {
     pub fn into_wasm_msg(self, contract: Addr, receiver: String) -> StdResult<WasmMsg> {
         Ok(WasmMsg::Execute {
             contract_addr: contract.into_string(),
-            msg: to_binary(&ExecuteMsg::Callback(CallbackMsg::RedeemVouchers {
-                receiver,
-                redeem: self,
-            }))?,
+            msg: to_binary(&Ics721InnerCallback::Callback(
+                CallbackMsg::RedeemVouchers {
+                    receiver,
+                    redeem: self,
+                },
+            ))?,
             funds: vec![],
         })
     }
@@ -119,10 +121,12 @@ impl VoucherCreation {
     pub fn into_wasm_msg(self, contract: Addr, receiver: String) -> StdResult<WasmMsg> {
         Ok(WasmMsg::Execute {
             contract_addr: contract.into_string(),
-            msg: to_binary(&ExecuteMsg::Callback(CallbackMsg::CreateVouchers {
-                receiver,
-                create: self,
-            }))?,
+            msg: to_binary(&Ics721InnerCallback::Callback(
+                CallbackMsg::CreateVouchers {
+                    receiver,
+                    create: self,
+                },
+            ))?,
             funds: vec![],
         })
     }

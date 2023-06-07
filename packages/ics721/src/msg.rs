@@ -1,22 +1,10 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::WasmMsg;
-use cw721_proxy_derive::cw721_proxy;
 
 use crate::token_types::{ClassId, Token, VoucherCreation, VoucherRedemption};
 
-#[cw721_proxy]
 #[cw_serde]
-pub enum ExecuteMsg {
-    /// Receives a NFT to be IBC transfered away. The `msg` field must
-    /// be a binary encoded `IbcOutgoingMsg`.
-    ReceiveNft(cw721::Cw721ReceiveMsg),
-
-    /// Pauses the bridge. Only the pauser may call this. In pausing
-    /// the contract, the pauser burns the right to do so again.
-    Pause {},
-
-    /// Mesages used internally by the contract. These may only be
-    /// called by the contract itself.
+pub enum Ics721InnerCallback {
     Callback(CallbackMsg),
 }
 

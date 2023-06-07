@@ -3,13 +3,13 @@ use cw_cii::{Admin, ContractInstantiateInfo};
 use cw_multi_test::{App, Contract, ContractWrapper, Executor};
 use cw_pause_once::PauseError;
 use ics721::{
-    msg::{CallbackMsg, ExecuteMsg},
+    msg::{CallbackMsg, Ics721InnerCallback},
     token_types::{Class, ClassId, Token, TokenId, VoucherCreation},
     IbcOutgoingMsg,
 };
 
 use crate::{
-    msg::{InstantiateMsg, MigrateMsg, QueryMsg},
+    msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg},
     ContractError,
 };
 
@@ -210,7 +210,7 @@ fn test_do_instantiate_and_mint_weird_data() {
         .execute_contract(
             test.bridge.clone(),
             test.bridge,
-            &ExecuteMsg::Callback(CallbackMsg::CreateVouchers {
+            &Ics721InnerCallback::Callback(CallbackMsg::CreateVouchers {
                 receiver: "ekez".to_string(),
                 create: VoucherCreation {
                     class: Class {
@@ -239,7 +239,7 @@ fn test_do_instantiate_and_mint() {
         .execute_contract(
             test.bridge.clone(),
             test.bridge.clone(),
-            &ExecuteMsg::Callback(CallbackMsg::CreateVouchers {
+            &Ics721InnerCallback::Callback(CallbackMsg::CreateVouchers {
                 receiver: "ekez".to_string(),
                 create: VoucherCreation {
                     class: Class {
@@ -366,7 +366,7 @@ fn test_do_instantiate_and_mint_no_instantiate() {
         .execute_contract(
             test.bridge.clone(),
             test.bridge.clone(),
-            &ExecuteMsg::Callback(CallbackMsg::CreateVouchers {
+            &Ics721InnerCallback::Callback(CallbackMsg::CreateVouchers {
                 receiver: "ekez".to_string(),
                 create: VoucherCreation {
                     class: Class {
@@ -396,7 +396,7 @@ fn test_do_instantiate_and_mint_no_instantiate() {
         .execute_contract(
             test.bridge.clone(),
             test.bridge.clone(),
-            &ExecuteMsg::Callback(CallbackMsg::CreateVouchers {
+            &Ics721InnerCallback::Callback(CallbackMsg::CreateVouchers {
                 receiver: "ekez".to_string(),
                 create: VoucherCreation {
                     class: Class {
@@ -457,7 +457,7 @@ fn test_do_instantiate_and_mint_permissions() {
         .execute_contract(
             Addr::unchecked("notbridge"),
             test.bridge,
-            &ExecuteMsg::Callback(CallbackMsg::CreateVouchers {
+            &Ics721InnerCallback::Callback(CallbackMsg::CreateVouchers {
                 receiver: "ekez".to_string(),
                 create: VoucherCreation {
                     class: Class {

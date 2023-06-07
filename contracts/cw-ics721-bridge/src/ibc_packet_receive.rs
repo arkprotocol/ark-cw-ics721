@@ -3,7 +3,7 @@ use cosmwasm_std::{
     StdResult, SubMsg, WasmMsg,
 };
 use ics721::{
-    msg::{CallbackMsg, ExecuteMsg},
+    msg::{CallbackMsg, Ics721InnerCallback},
     token_types::{Class, ClassId, Token, TokenId, VoucherCreation, VoucherRedemption},
     NonFungibleTokenPacketData,
 };
@@ -246,7 +246,7 @@ impl ActionAggregator {
         } else {
             WasmMsg::Execute {
                 contract_addr: contract.into_string(),
-                msg: to_binary(&ExecuteMsg::Callback(CallbackMsg::Conjunction {
+                msg: to_binary(&Ics721InnerCallback::Callback(CallbackMsg::Conjunction {
                     operands: m,
                 }))?,
                 funds: vec![],
