@@ -37,8 +37,11 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::ReceiveNft(msg) => ics721_cb::handle_receive_callback(deps, msg),
-        ExecuteMsg::Ics721Callback(msg) => ics721_cb::handle_callback_callback(deps, msg),
+        ExecuteMsg::ReceiveNft(msg) => receive_callbacks::handle_receive_cw_callback(deps, msg),
+        ExecuteMsg::ReceiveNftIcs721(msg) => {
+            receive_callbacks::handle_receive_ics_callback(deps, msg)
+        }
+        ExecuteMsg::Ics721Callback(msg) => receive_callbacks::handle_callback_callback(deps, msg),
         ExecuteMsg::SendNft {
             cw721,
             ics721,
@@ -57,17 +60,26 @@ pub fn execute(
     }
 }
 
-mod ics721_cb {
+mod receive_callbacks {
     use cosmwasm_std::{from_binary, Addr, DepsMut, Response};
     use ics721::{Ics721CallbackMsg, Ics721ReceiveMsg, Ics721Status, NonFungibleTokenPacketData};
 
     use crate::{
         msg::Ics721Callbacks,
-        state::{ICS721, RECEIVED_CALLBACK, SENT_CALLBACK},
+        state::{CW721_RECEIVE, ICS721, RECEIVED_CALLBACK, SENT_CALLBACK},
         ContractError,
     };
 
-    pub(crate) fn handle_receive_callback(
+    pub(crate) fn handle_receive_cw_callback(
+        deps: DepsMut,
+        _msg: cw721::Cw721ReceiveMsg,
+    ) -> Result<Response, ContractError> {
+        // We got the callback, so its working
+        CW721_RECEIVE.save(deps.storage, &"success".to_string())?;
+        Ok(Response::new())
+    }
+
+    pub(crate) fn handle_receive_ics_callback(
         deps: DepsMut,
         msg: Ics721ReceiveMsg,
     ) -> Result<Response, ContractError> {

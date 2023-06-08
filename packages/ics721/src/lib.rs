@@ -55,6 +55,6 @@ pub enum Ics721Status {
 /// Tihs is a wrapper for ics721 callbacks
 #[cw_serde]
 pub enum ReceiverExecuteMsg {
-    ReceiveNft(Ics721ReceiveMsg),
+    ReceiveNftIcs721(Ics721ReceiveMsg),
     Ics721Callback(Ics721CallbackMsg),
 }

@@ -79,10 +79,12 @@ pub(crate) fn receive_callback_msg(
     // Create the message we send to the contract
     // The status is the status we want to send back to the contract
     // The msg is the msg we forward from the sender
-    let msg = to_binary(&ics721::ReceiverExecuteMsg::ReceiveNft(Ics721ReceiveMsg {
-        msg: callbacks.dest_callback_msg?,
-        original_packet: packet,
-    }))
+    let msg = to_binary(&ics721::ReceiverExecuteMsg::ReceiveNftIcs721(
+        Ics721ReceiveMsg {
+            msg: callbacks.dest_callback_msg?,
+            original_packet: packet,
+        },
+    ))
     .ok()?;
 
     Some(
