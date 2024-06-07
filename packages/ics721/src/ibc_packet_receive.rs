@@ -13,7 +13,7 @@ use crate::{
         load_nft_contract_for_class_id, query_get_instantiate2_nft_contract,
         query_nft_contract_for_class_id,
     },
-    state::{CW721_CODE_ID, OUTGOING_CLASS_TOKEN_TO_CHANNEL, PO},
+    state::{OUTGOING_CLASS_TOKEN_TO_CHANNEL, PO},
     token_types::{VoucherCreation, VoucherRedemption},
     ContractError,
 };
@@ -240,13 +240,7 @@ fn create_callback_msg(
                 Some(nft_contract) => Ok(nft_contract),
                 None => {
                     // contract not yet instantiated, so we use instantiate2 to get the contract address
-                    let cw721_code_id = CW721_CODE_ID.load(deps.storage)?;
-                    query_get_instantiate2_nft_contract(
-                        deps,
-                        env,
-                        local_class_id.clone(),
-                        Some(cw721_code_id),
-                    )
+                    query_get_instantiate2_nft_contract(deps, env, local_class_id.clone(), None)
                 }
             }
         }?;
